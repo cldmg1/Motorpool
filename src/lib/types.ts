@@ -48,12 +48,16 @@ export type Part = {
   id: string
   name: string
   category: string | null
+  subcategory: string | null
+  brand_section: string | null
+  brand_subsection: string | null
+  brand_tags: string[]
   is_active: boolean
   sort_order: number
   created_at: string
 }
 
-export type DiagnosticStatus = 'draft' | 'completed'
+export type DiagnosticStatus = 'draft' | 'en_espera' | 'completed'
 
 export type Diagnostic = {
   id: string
@@ -65,9 +69,15 @@ export type Diagnostic = {
   horas_motor: number | null
   horas_fuente: number | null
   descripcion_averia: string | null
+  numero_serie: string | null
   status: DiagnosticStatus
+  prioridad: 'urgente' | 'normal' | 'baja'
+  tipo_intervencion: string | null
+  fecha_entrega: string | null
+  notas_internas: string | null
   created_at: string
   updated_at: string
+  closed_at: string | null
 }
 
 export type DiagnosticItem = {
@@ -102,6 +112,11 @@ export type DiagnosticFormData = {
   horas_motor: string
   horas_fuente: string
   descripcion_averia: string
+  numero_serie: string
+  prioridad: 'urgente' | 'normal' | 'baja'
+  tipo_intervencion: string
+  fecha_entrega: string
+  notas_internas: string
 }
 
 export type ChecklistItem = {
@@ -111,4 +126,59 @@ export type ChecklistItem = {
   checked: boolean
   quantity: number
   is_custom: boolean
+  category: string | null
+  subcategory: string | null
+  brand_section: string | null
+  brand_subsection: string | null
+  brand_tags: string[]
+}
+
+export type CompanySettings = {
+  id: number
+  name: string
+  email: string
+  phone: string | null
+  address: string | null
+  iva_default: number
+  email_body: string | null
+  updated_at: string
+}
+
+export type Quote = {
+  id: string
+  user_id: string
+  diagnostic_id: string | null
+  cliente: string
+  modelo: string
+  notas: string | null
+  iva_included: boolean
+  iva_rate: number
+  status: 'pending' | 'accepted' | 'rejected'
+  firma_cliente: string | null
+  fecha_validez: string | null
+  created_at: string
+}
+
+export type QuoteItem = {
+  id: string
+  quote_id: string
+  description: string
+  quantity: number
+  unit_price: number
+  sort_order: number
+}
+
+export type QuoteWithItems = Quote & {
+  quote_items: QuoteItem[]
+}
+
+export type AuditEntry = {
+  id: string
+  user_id: string | null
+  action: string
+  entity_type: string
+  entity_id: string
+  description: string
+  created_at: string
+  profiles?: { full_name: string; email: string } | null
 }

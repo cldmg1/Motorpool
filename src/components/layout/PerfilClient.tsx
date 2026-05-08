@@ -1,49 +1,41 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import type { Profile } from '@/lib/types'
-import { createClient } from '@/lib/supabase/client'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
-import Button from '@/components/ui/Button'
 
-export default function PerfilClient({ profile }: { profile: Profile }) {
-  const router = useRouter()
-  const [newPassword, setNewPassword] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [msg, setMsg] = useState('')
-  const [error, setError] = useState('')
+export default function PerfilClient({ profile }: { profile: Profile & { has_changed_password: boolean } }) {
+  const [showBanner, setShowBanner] = useState(false)
 
-  async function handlePasswordChange(e: React.FormEvent) {
-    e.preventDefault()
-    if (newPassword.length < 6) {
-      setError('Mínimo 6 caracteres')
-      return
-    }
-    setSaving(true)
-    setError('')
-    const supabase = createClient()
-    const { error } = await supabase.auth.updateUser({ password: newPassword })
-    if (error) {
-      setError(error.message)
-    } else {
-      setMsg('Contraseña actualizada correctamente.')
-      setNewPassword('')
-    }
-    setSaving(false)
-  }
-
-  async function handleLogout() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/login')
-    router.refresh()
-  }
+  useEffect(() => {
+    if (!profile.has_changed_password) setShowBanner(true)
+  }, [profile.has_changed_password])
 
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-black text-mp-blue">Mi Perfil</h1>
+
+      {showBanner && (
+        <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3.5">
+          <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          </svg>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-amber-800">Cambia tu contraseña</p>
+            <p className="text-xs text-amber-700 mt-0.5">Estás usando la contraseña predeterminada. Cámbiala por una segura desde ajustes.</p>
+            <Link href="/ajustes" className="inline-block mt-1.5 text-xs font-bold text-amber-800 underline underline-offset-2">
+              Ir a Ajustes →
+            </Link>
+          </div>
+          <button onClick={() => setShowBanner(false)} className="text-amber-400 hover:text-amber-600 flex-shrink-0">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       <Card className="p-6 space-y-4">
         <div className="flex items-center gap-4">
@@ -52,7 +44,7 @@ export default function PerfilClient({ profile }: { profile: Profile }) {
           </div>
           <div>
             <p className="font-bold text-mp-blue text-lg">{profile.full_name}</p>
-            <p className="text-sm text-gray-400">{profile.email}</p>
+            <p className="text-sm text-gray-400">@{profile.email.split('@')[0]}</p>
             <div className="mt-1">
               <Badge variant={profile.role === 'admin' ? 'orange' : 'blue'}>
                 {profile.role === 'admin' ? 'Administrador' : 'Técnico SAT'}
@@ -61,38 +53,6 @@ export default function PerfilClient({ profile }: { profile: Profile }) {
           </div>
         </div>
       </Card>
-
-      <Card className="p-6">
-        <h2 className="text-sm font-bold text-mp-blue mb-4">Cambiar Contraseña</h2>
-        <form onSubmit={handlePasswordChange} className="space-y-3">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-              Nueva Contraseña
-            </label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
-              minLength={6}
-              required
-              className="w-full px-4 py-3 bg-gray-50 rounded-xl border-0 outline-none focus:ring-2 focus:ring-mp-blue text-sm"
-              placeholder="Mínimo 6 caracteres"
-            />
-          </div>
-          {error && <p className="text-red-500 text-xs bg-red-50 px-3 py-2 rounded-xl">{error}</p>}
-          {msg && <p className="text-green-600 text-xs bg-green-50 px-3 py-2 rounded-xl">{msg}</p>}
-          <Button type="submit" loading={saving} className="w-full">
-            Actualizar Contraseña
-          </Button>
-        </form>
-      </Card>
-
-      <button
-        onClick={handleLogout}
-        className="w-full text-red-400 font-bold text-sm py-3 hover:text-red-500 transition-colors"
-      >
-        Cerrar Sesión
-      </button>
     </div>
   )
 }

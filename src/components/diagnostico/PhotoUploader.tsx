@@ -92,12 +92,12 @@ export default function PhotoUploader({ files, onChange, onBack, onNext }: Props
       </Card>
 
       <div className="sticky bottom-20 md:bottom-4 flex gap-3">
-        <Button variant="ghost" onClick={onBack} className="flex-shrink-0 px-5">
+        <Button variant="ghost" onClick={onBack} className="flex-shrink-0 px-5 bg-orange-50 text-mp-orange hover:bg-orange-100">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </Button>
-        <Button variant="secondary" onClick={onNext} className="flex-1 py-4 text-base">
+        <Button variant="secondary" onClick={onNext} className="flex-1 py-4 text-base bg-mp-orange text-white hover:bg-mp-orange/90">
           {files.length > 0 ? `Siguiente: Resumen (${files.length} fotos)` : 'Siguiente: Resumen'}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

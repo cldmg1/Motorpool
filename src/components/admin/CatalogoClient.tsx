@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { sileo } from 'sileo'
 import type { Part } from '@/lib/types'
 import { createPart, updatePart, deletePart } from '@/actions/parts'
 import Badge from '@/components/ui/Badge'
@@ -16,13 +17,23 @@ export default function CatalogoClient({ parts }: { parts: Part[] }) {
     if (!name) return
     setAdding(true)
     const result = await createPart(name)
-    if (result.error) setError(result.error)
-    else setNewName('')
+    if (result.error) {
+      setError(result.error)
+      sileo.error({ title: 'Error al añadir', description: result.error })
+    } else {
+      setNewName('')
+      sileo.success({ title: 'Pieza añadida' })
+    }
     setAdding(false)
   }
 
   async function toggleActive(part: Part) {
-    await updatePart(part.id, { is_active: !part.is_active })
+    const result = await updatePart(part.id, { is_active: !part.is_active })
+    if (result?.error) {
+      sileo.error({ title: 'Error', description: result.error })
+    } else {
+      sileo.success({ title: part.is_active ? 'Pieza desactivada' : 'Pieza activada' })
+    }
   }
 
   return (

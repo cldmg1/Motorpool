@@ -11,11 +11,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
     .single()
+
+  console.log('[app-layout] user:', user.id, 'profile:', profile?.id ?? null, 'error:', profileError?.message ?? null)
 
   if (!profile) {
     redirect('/login')
@@ -24,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar profile={profile} />
-      <main className="flex-1 pb-24 md:pb-8">
+      <main className="flex-1 pb-28 md:pb-8">
         {children}
       </main>
       <MobileNav role={profile.role} />

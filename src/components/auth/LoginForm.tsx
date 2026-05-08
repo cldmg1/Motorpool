@@ -1,33 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { Eye, EyeOff } from 'lucide-react'
+import { login } from '@/actions/auth'
 import Image from 'next/image'
 
 export default function LoginForm() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const formData = new FormData(e.currentTarget)
+    const result = await login(formData)
 
-    if (error) {
-      setError('Credenciales incorrectas. Verifica tu email y contraseña.')
+    if (result?.error) {
+      setError(result.error)
       setLoading(false)
       return
     }
 
-    router.push('/diagnostico')
     router.refresh()
+    router.push('/inicio')
   }
 
   return (
@@ -48,16 +48,16 @@ export default function LoginForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-              Email
+              Usuario
             </label>
             <input
-              type="email"
+              type="text"
+              name="username"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 bg-gray-50 rounded-xl border-0 outline-none focus:ring-2 focus:ring-mp-blue text-sm"
-              placeholder="tecnico@motorpool.com"
-              autoComplete="email"
+              placeholder="usuario"
+              autoComplete="username"
+              autoCapitalize="none"
             />
           </div>
 
@@ -65,15 +65,24 @@ export default function LoginForm() {
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
               Contraseña
             </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-50 rounded-xl border-0 outline-none focus:ring-2 focus:ring-mp-blue text-sm"
-              placeholder="••••••••"
-              autoComplete="current-password"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                required
+                className="w-full px-4 py-3 pr-11 bg-gray-50 rounded-xl border-0 outline-none focus:ring-2 focus:ring-mp-blue text-sm"
+                placeholder="••••••••"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-mp-blue transition-colors cursor-pointer"
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           {error && (

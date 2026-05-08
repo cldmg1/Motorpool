@@ -14,6 +14,19 @@ type Props = {
   onSave: () => void
 }
 
+const TIPO_LABELS: Record<string, string> = {
+  reparacion: 'Reparación',
+  revision: 'Revisión',
+  instalacion: 'Instalación',
+  mantenimiento: 'Mantenimiento',
+}
+
+const PRIORIDAD_BADGE: Record<string, string> = {
+  urgente: 'bg-red-100 text-red-600',
+  normal: 'bg-gray-100 text-gray-500',
+  baja: 'bg-blue-100 text-blue-600',
+}
+
 export default function DiagnosticSummary({
   formData,
   items,
@@ -53,6 +66,32 @@ export default function DiagnosticSummary({
                   <p className="font-semibold text-sm text-gray-800">{value || '—'}</p>
                 </div>
               ))}
+
+              {/* Prioridad */}
+              <div className="space-y-0.5">
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider">Prioridad</p>
+                <span className={`inline-block text-xs font-bold px-2.5 py-0.5 rounded-full ${PRIORIDAD_BADGE[formData.prioridad] ?? PRIORIDAD_BADGE.normal}`}>
+                  {formData.prioridad.charAt(0).toUpperCase() + formData.prioridad.slice(1)}
+                </span>
+              </div>
+
+              {/* Tipo de intervención */}
+              {formData.tipo_intervencion && (
+                <div className="space-y-0.5">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider">Tipo</p>
+                  <p className="font-semibold text-sm text-gray-800">{TIPO_LABELS[formData.tipo_intervencion] ?? formData.tipo_intervencion}</p>
+                </div>
+              )}
+
+              {/* Fecha de entrega */}
+              {formData.fecha_entrega && (
+                <div className="space-y-0.5">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider">Fecha entrega</p>
+                  <p className="font-semibold text-sm text-gray-800">
+                    {new Date(formData.fecha_entrega).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </p>
+                </div>
+              )}
             </div>
           </section>
 
@@ -113,20 +152,22 @@ export default function DiagnosticSummary({
       {error && (
         <p className="text-red-500 text-sm font-medium bg-red-50 px-4 py-3 rounded-xl">{error}</p>
       )}
+      <div className="h-20 md:h-16" />
 
-      <div className="sticky bottom-20 md:bottom-4 flex gap-3">
-        <Button variant="ghost" onClick={onBack} className="flex-shrink-0 px-5" disabled={saving}>
+      <div className="fixed bottom-20 md:bottom-4 left-0 right-0 px-4 max-w-3xl mx-auto flex gap-3 z-10">
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-transparent -z-10 pointer-events-none" />
+        <Button variant="ghost" onClick={onBack} className="flex-shrink-0 px-5 bg-orange-50 text-mp-orange hover:bg-orange-100" disabled={saving}>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </Button>
         <Button
-          variant="primary"
+          variant="default"
           onClick={onSave}
           loading={saving}
-          className="flex-1 py-4 text-base"
+          className="flex-1 py-4 text-base bg-mp-blue text-white hover:bg-mp-blue/90"
         >
-          {saving ? 'Guardando...' : 'Guardar Diagnóstico'}
+          {saving ? 'Guardando...' : 'Guardar parte'}
         </Button>
       </div>
     </div>

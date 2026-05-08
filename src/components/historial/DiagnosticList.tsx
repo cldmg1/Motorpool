@@ -3,8 +3,11 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Trash2 } from 'lucide-react'
+import { sileo } from 'sileo'
 import type { Diagnostic, Profile } from '@/lib/types'
 import Badge from '@/components/ui/Badge'
+import { deleteDiagnostic } from '@/actions/diagnostics'
 
 type DiagnosticRow = Diagnostic & { profiles: Pick<Profile, 'full_name' | 'email'> | null }
 
@@ -20,6 +23,30 @@ type Props = {
 export default function DiagnosticList({ diagnostics, total, page, pageSize, searchQuery, isAdmin }: Props) {
   const router = useRouter()
   const [q, setQ] = useState(searchQuery)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  function handleDelete(id: string, cliente: string) {
+    sileo.show({
+      type: 'error',
+      title: '¿Eliminar parte?',
+      description: `${cliente} — Esta acción es irreversible. Si no tienes copia guardada no podrás recuperarlo. ¿Estás seguro?`,
+      duration: 8000,
+      button: {
+        title: 'Eliminar',
+        onClick: async () => {
+          setDeletingId(id)
+          const result = await deleteDiagnostic(id)
+          setDeletingId(null)
+          if (result.error) {
+            sileo.error({ title: 'Error al eliminar', description: result.error })
+          } else {
+            sileo.success({ title: 'Parte eliminado' })
+            router.refresh()
+          }
+        },
+      },
+    })
+  }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -97,12 +124,22 @@ export default function DiagnosticList({ diagnostics, total, page, pageSize, sea
                   )}
                 </div>
                 <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                  <Badge variant="green">Completado</Badge>
+                  <Badge variant={d.status === 'completed' ? 'red' : 'green'}>
+                    {d.status === 'completed' ? 'Finalizado' : 'Abierto'}
+                  </Badge>
                   <p className="text-[10px] text-gray-400">
                     {new Date(d.created_at).toLocaleDateString('es-ES', {
                       day: '2-digit', month: 'short', year: 'numeric'
                     })}
                   </p>
+                  <button
+                    onClick={e => { e.preventDefault(); handleDelete(d.id, d.cliente) }}
+                    disabled={deletingId === d.id}
+                    className="text-gray-300 hover:text-red-400 transition-colors cursor-pointer disabled:opacity-40"
+                    aria-label="Eliminar parte"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </Link>

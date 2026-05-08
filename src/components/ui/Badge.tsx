@@ -1,4 +1,4 @@
-type Variant = 'blue' | 'orange' | 'green' | 'gray' | 'red'
+type Variant = 'blue' | 'orange' | 'green' | 'gray' | 'red' | 'amber'
 
 const variants: Record<Variant, string> = {
   blue: 'bg-mp-blue text-white',
@@ -6,6 +6,7 @@ const variants: Record<Variant, string> = {
   green: 'bg-green-500 text-white',
   gray: 'bg-gray-100 text-gray-600',
   red: 'bg-red-100 text-red-600',
+  amber: 'bg-amber-100 text-amber-700',
 }
 
 export default function Badge({
